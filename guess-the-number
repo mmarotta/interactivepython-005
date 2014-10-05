@@ -1,0 +1,68 @@
+import simplegui
+import random
+
+# int that the player just guessed
+player_guess = 0
+# the number that the player is trying to guess
+secret_number = 0
+# the maximum number in the guessing range (default 100)
+max_range = 100
+
+# helper function to start and restart the game
+def new_game():
+    # set a random number that the player will try and guess
+    global secret_number, max_range
+    secret_number = random.randrange(0, max_range)
+    
+    # print a welcome message
+    print ""
+    print "Let's play guess the number.... go!"
+    
+
+# define event handlers for control panel
+def range100():
+    # button that changes the range to [0,100) and starts a new game 
+    global max_range
+    max_range = 100
+    new_game()
+
+def range1000():
+    # button that changes the range to [0,1000) and starts a new game     
+    global max_range
+    max_range = 1000
+    new_game()
+    
+def input_guess(guess):
+    # define the globals
+    global secret_number
+
+    # print out the player's guess
+    print "Guess was", guess
+    player_guess = int(guess)
+    
+    if player_guess == secret_number:
+        print "player wins"
+        # let's play again... how about a nice game of chess
+        print "That was fun, let's do it again"
+        new_game()
+    elif player_guess > secret_number:
+        print "too high"
+    elif player_guess < secret_number:
+        print "too low"
+    else:
+        # this should never happen....
+        print "i've got a bad feeling about this"
+        
+    
+# create frame
+main_frame = simplegui.create_frame('Guess the number', 200, 200)
+
+# register event handlers for control elements and start frame
+main_frame.add_input("My Guess is:", input_guess, 100)
+main_frame.add_button("Play 0 to 100", range100, 100)
+main_frame.add_button("Play 0 to 1000" , range1000, 100)
+main_frame.start()
+
+# call new_game 
+new_game()
+
