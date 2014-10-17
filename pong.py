@@ -62,7 +62,21 @@ def get_random_velocity():
     x = random.randrange(120, 240)
     y = random.randrange(60, 180)
     return [x, y]
-    
+
+def vector_add(point, vector):
+    x = point[0] + vector[0]
+    y = point[1] + vector[1]
+    return [x, y]
+
+def reflect(velocity, edge):
+    if edge == "TOP" or edge == "BOTTOM":
+        return [velocity[0], -velocity[1]]
+    elif edge == "LEFT" or edge == "RIGHT":
+        return [-velocity[0], velocity[1]]
+    else:
+        # should neven happen
+        return velocity
+
 def draw(canvas):
     global score1, score2, paddle1_pos, paddle2_pos, ball_pos, ball_vel
  
@@ -72,14 +86,15 @@ def draw(canvas):
     canvas.draw_line([WIDTH - PAD_WIDTH, 0],[WIDTH - PAD_WIDTH, HEIGHT], 1, "White")
         
     # update ball
-    ball_pos[0] += ball_vel[0]
-    ball_pos[1] += ball_vel[1]
+    ball_pos = vector_add(ball_pos, ball_vel)
     
     # draw ball
     canvas.draw_circle(ball_pos, BALL_RADIUS, 1, "White", "White")
     
     # update paddle's vertical position, keep paddle on the screen
-    
+    paddle1_pos[1] += paddle1_vel[1]
+    paddle2_pos[1] += paddle2_vel[1]
+
     # draw paddles
     canvas.draw_polygon([[0, paddle1_pos[1] + PAD_HEIGHT/2], [PAD_WIDTH, paddle1_pos[1] + PAD_HEIGHT/2], [PAD_WIDTH, paddle1_pos[1] - PAD_HEIGHT/2], [0, paddle1_pos[1] - PAD_HEIGHT/2]], 1, "White", "White")
     canvas.draw_polygon([[WIDTH - PAD_WIDTH, paddle2_pos[1] + PAD_HEIGHT/2], [WIDTH, paddle2_pos[1] + PAD_HEIGHT/2], [WIDTH, paddle2_pos[1] - PAD_HEIGHT/2], [WIDTH - PAD_WIDTH, paddle2_pos[1] - PAD_HEIGHT/2]], 1, "White", "White")
