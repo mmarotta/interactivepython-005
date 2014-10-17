@@ -44,7 +44,25 @@ def spawn_ball(direction):
 def new_game():
     global paddle1_pos, paddle2_pos, paddle1_vel, paddle2_vel  # these are numbers
     global score1, score2  # these are ints
+    
+    # reset the scores
+    score1 = 0
+    score2 = 0
+    
+    spawn_ball(get_random_direction())
 
+def get_random_direction():
+    val = random.randrange(0, 2)
+    if val == 0:
+        return "LEFT"
+    else:
+        return "RIGHT"
+  
+def get_random_velocity():
+    x = random.randrange(120, 240)
+    y = random.randrange(60, 180)
+    return [x, y]
+    
 def draw(canvas):
     global score1, score2, paddle1_pos, paddle2_pos, ball_pos, ball_vel
  
@@ -54,7 +72,9 @@ def draw(canvas):
     canvas.draw_line([WIDTH - PAD_WIDTH, 0],[WIDTH - PAD_WIDTH, HEIGHT], 1, "White")
         
     # update ball
-            
+    ball_pos[0] += ball_vel[0]
+    ball_pos[1] += ball_vel[1]
+    
     # draw ball
     canvas.draw_circle(ball_pos, BALL_RADIUS, 1, "White", "White")
     
@@ -70,7 +90,16 @@ def draw(canvas):
     
 def keydown(key):
     global paddle1_vel, paddle2_vel
-   
+    
+    if key == simplegui.KEY_MAP["up"]:
+        paddle2_vel[1] -= 1
+    elif key == simplegui.KEY_MAP["down"]:
+        paddle2_vel[1] += 1
+    elif key == simplegui.KEY_MAP["w"]:        
+        paddle1_vel[1] -= 1
+    elif key == simplegui.KEY_MAP["s"]:
+        paddle1_vel[1] += 1
+        
 def keyup(key):
     global paddle1_vel, paddle2_vel
 
