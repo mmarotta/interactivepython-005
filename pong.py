@@ -68,15 +68,15 @@ def vector_add(point, vector):
     y = point[1] + vector[1]
     return [x, y]
 
-def reflect(velocity, edge):
-    if edge == "TOP" or edge == "BOTTOM":
-        return [velocity[0], -velocity[1]]
-    elif edge == "LEFT" or edge == "RIGHT":
-        return [-velocity[0], velocity[1]]
+def reflect(vector, edge):
+    if edge == "VERTICAL":
+        return [vector[0], -vector[1]]
+    elif edge == "HORIZONTAL":
+        return [-vector[0], vector[1]]
     else:
         # should neven happen
-        return velocity
-
+        return vector
+    
 def draw(canvas):
     global score1, score2, paddle1_pos, paddle2_pos, ball_pos, ball_vel
  
@@ -87,6 +87,8 @@ def draw(canvas):
         
     # update ball
     ball_pos = vector_add(ball_pos, ball_vel)
+    if ball_pos[1] <= BALL_RADIUS or ball_pos[1] >= HEIGHT - BALL_RADIUS:
+        ball_vel = reflect(ball_vel, "VERTICAL")
     
     # draw ball
     canvas.draw_circle(ball_pos, BALL_RADIUS, 1, "White", "White")
