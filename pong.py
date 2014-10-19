@@ -72,14 +72,28 @@ def reflect(vector, edge):
     if edge == "VERTICAL":
         return [vector[0], -vector[1]]
     elif edge == "HORIZONTAL":
-        return [-vector[0], vector[1]]
+        if vector[0] > 0:
+            return [-1 * (vector[0] + 1), vector[1]]
+        else:
+            return [-1 * (vector[0] - 1), vector[1]]
     else:
         # should neven happen
         return vector
+
+def move_paddle(pos, vel):
+    pos[1] += vel[1]
+    if pos[1] < HALF_PAD_HEIGHT:
+        pos[1] = HALF_PAD_HEIGHT
+        vel[1] = 0
+    if pos[1] > HEIGHT - HALF_PAD_HEIGHT:
+        pos[1] = HEIGHT - HALF_PAD_HEIGHT
+        vel[1] = 0
+    
+    return pos
     
 def draw(canvas):
     global score1, score2, paddle1_pos, paddle2_pos, ball_pos, ball_vel
- 
+
     # draw mid line and gutters
     canvas.draw_line([WIDTH / 2, 0],[WIDTH / 2, HEIGHT], 1, "White")
     canvas.draw_line([PAD_WIDTH, 0],[PAD_WIDTH, HEIGHT], 1, "White")
@@ -87,28 +101,33 @@ def draw(canvas):
         
     # update ball
     ball_pos = vector_add(ball_pos, ball_vel)
+    
+    # check for top/bottom wall collision
     if ball_pos[1] <= BALL_RADIUS or ball_pos[1] >= HEIGHT - BALL_RADIUS:
         ball_vel = reflect(ball_vel, "VERTICAL")
+    
+    # check for gutter collision
+    if ball_pos[0] <= BALL_RADIUS + PAD_WIDTH or ball_pos[0] >= WIDTH - BALL_RADIUS - PAD_WIDTH:
+        # hit the gutter, did it hit a paddle
+        if ball_vel[0] > 0 and (ball_pos[1] < paddle2_pos[1] - HALF_PAD_HEIGHT or ball_pos[1] > paddle2_pos[1] + HALF_PAD_HEIGHT):          
+            # score player 1
+            score1 += 1
+            spawn_ball("LEFT")
+        elif ball_vel[0] < 0 and (ball_pos[1] < paddle1_pos[1] - HALF_PAD_HEIGHT or ball_pos[1] > paddle1_pos[1] + HALF_PAD_HEIGHT):
+            # score  player 2
+            score2 += 1
+            spawn_ball("RIGHT")
+        else:
+            # reflect
+            print "reflect"
+            ball_vel = reflect(ball_vel, "HORIZONTAL")
     
     # draw ball
     canvas.draw_circle(ball_pos, BALL_RADIUS, 1, "White", "White")
     
     # update paddle's vertical position, keep paddle on the screen
-    paddle1_pos[1] += paddle1_vel[1]
-    if paddle1_pos[1] < HALF_PAD_HEIGHT:
-        paddle1_pos[1] = HALF_PAD_HEIGHT
-        paddle1_vel[1] = 0
-    if paddle1_pos[1] > HEIGHT - HALF_PAD_HEIGHT:
-        paddle1_pos[1] = HEIGHT - HALF_PAD_HEIGHT
-        paddle1_vel[1] = 0
-    
-    paddle2_pos[1] += paddle2_vel[1]
-    if paddle2_pos[1] < HALF_PAD_HEIGHT:
-        paddle2_pos[1] = HALF_PAD_HEIGHT
-        paddle2_vel[1] = 0
-    if paddle2_pos[1] > HEIGHT - HALF_PAD_HEIGHT:
-        paddle2_pos[1] = HEIGHT - HALF_PAD_HEIGHT
-        paddle2_vel[1] = 0
+    move_paddle(paddle1_pos, paddle1_vel)
+    move_paddle(paddle2_pos, paddle2_vel)
         
     # draw paddles
     canvas.draw_polygon([[0, paddle1_pos[1] + PAD_HEIGHT/2], [PAD_WIDTH, paddle1_pos[1] + PAD_HEIGHT/2], [PAD_WIDTH, paddle1_pos[1] - PAD_HEIGHT/2], [0, paddle1_pos[1] - PAD_HEIGHT/2]], 1, "White", "White")
@@ -122,16 +141,24 @@ def keydown(key):
     global paddle1_vel, paddle2_vel
     
     if key == simplegui.KEY_MAP["up"]:
-        paddle2_vel[1] -= 1
+        paddle2_vel[1] -= 2
     elif key == simplegui.KEY_MAP["down"]:
-        paddle2_vel[1] += 1
+        paddle2_vel[1] += 2
     elif key == simplegui.KEY_MAP["w"]:        
-        paddle1_vel[1] -= 1
+        paddle1_vel[1] -= 2
     elif key == simplegui.KEY_MAP["s"]:
-        paddle1_vel[1] += 1
+        paddle1_vel[1] += 2
         
 def keyup(key):
     global paddle1_vel, paddle2_vel
+    if key == simplegui.KEY_MAP["up"]:
+        paddle2_vel[1] = 0
+    elif key == simplegui.KEY_MAP["down"]:
+        paddle2_vel[1] = 0
+    elif key == simplegui.KEY_MAP["w"]:        
+        paddle1_vel[1] = 0
+    elif key == simplegui.KEY_MAP["s"]:
+        paddle1_vel[1] = 0
 
 
 # create frame
