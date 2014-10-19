@@ -95,8 +95,21 @@ def draw(canvas):
     
     # update paddle's vertical position, keep paddle on the screen
     paddle1_pos[1] += paddle1_vel[1]
+    if paddle1_pos[1] < HALF_PAD_HEIGHT:
+        paddle1_pos[1] = HALF_PAD_HEIGHT
+        paddle1_vel[1] = 0
+    if paddle1_pos[1] > HEIGHT - HALF_PAD_HEIGHT:
+        paddle1_pos[1] = HEIGHT - HALF_PAD_HEIGHT
+        paddle1_vel[1] = 0
+    
     paddle2_pos[1] += paddle2_vel[1]
-
+    if paddle2_pos[1] < HALF_PAD_HEIGHT:
+        paddle2_pos[1] = HALF_PAD_HEIGHT
+        paddle2_vel[1] = 0
+    if paddle2_pos[1] > HEIGHT - HALF_PAD_HEIGHT:
+        paddle2_pos[1] = HEIGHT - HALF_PAD_HEIGHT
+        paddle2_vel[1] = 0
+        
     # draw paddles
     canvas.draw_polygon([[0, paddle1_pos[1] + PAD_HEIGHT/2], [PAD_WIDTH, paddle1_pos[1] + PAD_HEIGHT/2], [PAD_WIDTH, paddle1_pos[1] - PAD_HEIGHT/2], [0, paddle1_pos[1] - PAD_HEIGHT/2]], 1, "White", "White")
     canvas.draw_polygon([[WIDTH - PAD_WIDTH, paddle2_pos[1] + PAD_HEIGHT/2], [WIDTH, paddle2_pos[1] + PAD_HEIGHT/2], [WIDTH, paddle2_pos[1] - PAD_HEIGHT/2], [WIDTH - PAD_WIDTH, paddle2_pos[1] - PAD_HEIGHT/2]], 1, "White", "White")
@@ -126,6 +139,7 @@ frame = simplegui.create_frame("Pong", WIDTH, HEIGHT)
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
+frame.add_button("Restart", new_game, 200)
 
 
 # start frame
