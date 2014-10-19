@@ -119,7 +119,6 @@ def draw(canvas):
             spawn_ball("RIGHT")
         else:
             # reflect
-            print "reflect"
             ball_vel = reflect(ball_vel, "HORIZONTAL")
     
     # draw ball
