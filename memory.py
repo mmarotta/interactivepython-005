@@ -5,6 +5,9 @@ import random
 
 NUM_CARDS = 16
 exposed = [False] * NUM_CARDS
+state = 0
+this_turn = []
+total_turns = 0
 
 # create the list of cards
 cards = []
@@ -20,15 +23,22 @@ def cover_all_cards():
 def new_game():
     # shuffle the deck
     random.shuffle(cards)
-    
     # cover all the cards
     cover_all_cards()
-     
+    # reset the turn counter
+    turn_change(0)
+
 # define event handlers
 def mouseclick(pos):
-    # add game state logic here
-    pass
+    global state
     
+    # determine which card was clicked
+    x_pos = pos[0]
+    card_clicked = x_pos // 50
+    print "Clicked card #" + str(card_clicked)
+    if not exposed[card_clicked]:
+        # card is not already showing, show and update the state
+        state_change(card_clicked)
                         
 # cards are logically 50x100 pixels in size    
 def draw(canvas):
@@ -44,7 +54,35 @@ def draw(canvas):
         if not is_seen:
             canvas.draw_polygon([[x+2,2], [x+48,2], [x+48,98], [x+2,98]], 1, 'Green', 'Green')
         x += 50
-            
+
+def turn_change(x):
+    global total_turns
+    if x == 1:
+        total_turns += 1
+    elif x == 0:
+        total_turns = 0
+    label.set_text("Turns = " + str(total_turns))
+        
+def state_change(card_clicked):
+    # show the card that was clicked
+    exposed[card_clicked] = True
+    # add the card to the list of cards showing this turn
+    this_turn.append(card_clicked)
+
+    if len(this_turn) == 2:
+        # increment the turn counter
+        turn_change(1)
+        
+    elif len(this_turn) == 3:
+        # check if first two were matches, if not hide them again
+        if cards[this_turn[0]] != cards[this_turn[1]]:
+            exposed[this_turn[0]] = False
+            exposed[this_turn[1]] = False
+        
+        # that turn is over now, get them out of the list
+        this_turn.pop(1)
+        this_turn.pop(0)
+
 # create frame and add a button and labels
 frame = simplegui.create_frame("Memory", 800, 100)
 frame.add_button("Reset", new_game)
