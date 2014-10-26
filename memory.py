@@ -1,18 +1,15 @@
-# implementation of card game - Memory
-
 import simplegui
 import random
 
 NUM_CARDS = 16
-exposed = [False] * NUM_CARDS
-state = 0
+exposed = []
 this_turn = []
 total_turns = 0
 
 # create the list of cards
 cards = []
-cards.extend(range(0, NUM_CARDS/2 + 1))
-cards.extend(range(0, NUM_CARDS/2 + 1))
+cards.extend(range(0, NUM_CARDS/2))
+cards.extend(range(0, NUM_CARDS/2))
 
 # cover all cards
 def cover_all_cards():
@@ -30,14 +27,10 @@ def new_game():
 
 # define event handlers
 def mouseclick(pos):
-    global state
-    
     # determine which card was clicked
-    x_pos = pos[0]
-    card_clicked = x_pos // 50
-    print "Clicked card #" + str(card_clicked)
+    card_clicked = pos[0] // 50
+    # make sure card is not already showing before kicking a change
     if not exposed[card_clicked]:
-        # card is not already showing, show and update the state
         state_change(card_clicked)
                         
 # cards are logically 50x100 pixels in size    
@@ -72,7 +65,6 @@ def state_change(card_clicked):
     if len(this_turn) == 2:
         # increment the turn counter
         turn_change(1)
-        
     elif len(this_turn) == 3:
         # check if first two were matches, if not hide them again
         if cards[this_turn[0]] != cards[this_turn[1]]:
