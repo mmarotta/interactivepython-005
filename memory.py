@@ -49,11 +49,12 @@ def draw(canvas):
         x += 50
 
 def turn_change(x):
-    global total_turns
+    global total_turns, this_turn
     if x == 1:
         total_turns += 1
     elif x == 0:
         total_turns = 0
+        this_turn = []
     label.set_text("Turns = " + str(total_turns))
         
 def state_change(card_clicked):
