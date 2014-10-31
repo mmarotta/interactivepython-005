@@ -44,6 +44,7 @@ class Card:
         card_loc = (CARD_CENTER[0] + CARD_SIZE[0] * RANKS.index(self.rank), 
                     CARD_CENTER[1] + CARD_SIZE[1] * SUITS.index(self.suit))
         canvas.draw_image(card_images, card_loc, CARD_SIZE, [pos[0] + CARD_CENTER[0], pos[1] + CARD_CENTER[1]], CARD_SIZE)
+
         
 # define hand class
 class Hand:
@@ -119,32 +120,37 @@ def deal():
     dealer_hand.add_card(the_deck.deal_card())
     
     in_play = True
+    outcome = ""
 
 
 def hit():
-    global in_play
+    global in_play, outcome
     
     # if the hand is in play, hit the player
     if in_play:
         player_hand.add_card(the_deck.deal_card())
-    
-    # check if the player busted
-    if player_hand.get_value > 21:
-        in_play = False
-        game_over()
-    
+        
+        # check if the player busted
+        if player_hand.get_value() > 21:
+            in_play = False
+            game_over()
+    else:
+        outcome = "Game is over. Click Deal to play again."
+
 
 def stand():
-    global in_play
+    global in_play, outcome
     
     # if hand is in play, repeatedly hit dealer until his hand has value 17 or more
     if in_play:
-        while dealer_hand.get_value < 17:
+        while dealer_hand.get_value() < 17:
             dealer_hand.add_card(the_deck.deal_card())
-    
-    # everyone is done, check who won
-    in_play = False
-    game_over()
+            
+        # everyone is done, check who won
+        in_play = False
+        game_over()
+    else:
+        outcome = "Game is over. Click Deal to play again."
 
 
 # everyone is done getting cards
@@ -179,8 +185,7 @@ def draw(canvas):
     canvas.draw_text("Blackjack", [15, 50], 50, "White", "sans-serif")
     
     canvas.draw_text(outcome, [25, 100], 24, "White", "monospace")
-    canvas.draw_text("Score: " + str(score), [300, 100], 24, "White", "monospace")
-    
+    canvas.draw_text("Score: " + str(score), [400, 50], 24, "White", "monospace")
     
     canvas.draw_text("Dealer Hand", [25, 180], 24, "White", "monospace")
     canvas.draw_text("Player Hand", [25, 380], 24, "White", "monospace")
@@ -190,7 +195,7 @@ def draw(canvas):
     player_hand.draw(canvas, [25, 400])
 
     
-# create the Deck, a dealer hand, and a player hand
+# create the Deck, a dealer Hand, and a player Hand
 the_deck = None
 dealer_hand = None
 player_hand = None
