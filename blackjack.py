@@ -103,8 +103,12 @@ class Deck:
 
 # define event handlers for buttons
 def deal():
-    global the_deck, outcome, in_play, dealer_hand, player_hand
+    global score, the_deck, outcome, in_play, dealer_hand, player_hand
 
+    # if a game was in progress then the player loses
+    if in_play:
+        score -= 1
+    
     # create the deck and shuffle it
     the_deck = Deck()
     the_deck.shuffle()
@@ -120,7 +124,7 @@ def deal():
     dealer_hand.add_card(the_deck.deal_card())
     
     in_play = True
-    outcome = ""
+    outcome = "Hit or Stand?"
 
 
 def hit():
@@ -191,10 +195,16 @@ def draw(canvas):
     canvas.draw_text("Player Hand", [25, 380], 24, "White", "monospace")
 
     # draw the Hands
-    dealer_hand.draw(canvas, [25, 200])
+    dealer_card_pos = [25, 200]
+    dealer_hand.draw(canvas, list(dealer_card_pos))
     player_hand.draw(canvas, [25, 400])
 
-    
+    # if still in play (in_play = True) then show 
+    # the back of the first dealer card
+    if in_play:
+        canvas.draw_image(card_back, CARD_BACK_CENTER, CARD_BACK_SIZE, [dealer_card_pos[0] + CARD_BACK_CENTER[0], dealer_card_pos[1] + CARD_BACK_CENTER[1]], CARD_BACK_SIZE)
+
+        
 # create the Deck, a dealer Hand, and a player Hand
 the_deck = None
 dealer_hand = None
