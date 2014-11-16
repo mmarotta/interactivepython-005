@@ -9,6 +9,7 @@ HEIGHT = 600
 score = 0
 lives = 3
 time = 0.5
+c = 0.06
 
 class ImageInfo:
     def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
@@ -86,8 +87,8 @@ def dist(p,q):
 # Ship class
 class Ship:
     def __init__(self, pos, vel, angle, image, info):
-        self.pos = [pos[0],pos[1]]
-        self.vel = [vel[0],vel[1]]
+        self.pos = [pos[0], pos[1]]
+        self.vel = [vel[0], vel[1]]
         self.thrust = False
         self.angle = angle
         self.angle_vel = 0
@@ -98,10 +99,51 @@ class Ship:
         
     def draw(self,canvas):
         canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
-        
-    def update(self):
-        pass
     
+    def update(self):
+        # update the angle
+        self.angle += self.angle_vel
+        
+        # update the position
+        self.pos[0] += self.vel[0]
+        self.pos[1] += self.vel[1]
+        
+        # check if ship left the screen, if so put on other side
+        if self.pos[0] < 0:
+            self.pos[0] = WIDTH
+        elif self.pos[0] > WIDTH:
+            self.pos[0] = 0
+            
+        if self.pos[1] < 0:
+            self.pos[1] = HEIGHT
+        elif self.pos[1] > HEIGHT:
+            self.pos[1] = 0
+        
+        # friction update
+        self.vel[0] *= (1 - c)
+        self.vel[1] *= (1 - c)
+        
+        # velocity update
+        forward = [math.cos(self.angle), math.sin(self.angle)]
+        if self.thrust:
+            self.vel[0] += forward[0]
+            self.vel[1] += forward[1]
+
+    def toggle_rotate(self, direction):
+        if direction == "left":
+            self.angle_vel -= 0.05
+        elif direction == "right":
+            self.angle_vel += 0.05
+        elif direction == "stop":
+            self.angle_vel = 0
+
+    def toggle_thrust(self):
+        self.thrust = not self.thrust
+        # toggle to the correct image
+        if self.thrust:
+            self.image_center = [135, 45]
+        else:
+            self.image_center = [45, 45]
     
 # Sprite class
 class Sprite:
@@ -128,6 +170,23 @@ class Sprite:
         pass        
 
            
+def keydown_handler(key):
+    if key == simplegui.KEY_MAP["up"]:
+        my_ship.toggle_thrust()
+    elif key == simplegui.KEY_MAP["left"]:
+        my_ship.toggle_rotate("left")
+    elif key == simplegui.KEY_MAP["right"]:
+        my_ship.toggle_rotate("right")
+        
+def keyup_handler(key):
+    if key == simplegui.KEY_MAP["up"]:
+        my_ship.toggle_thrust()
+    elif key == simplegui.KEY_MAP["left"]:
+        my_ship.toggle_rotate("stop")      
+    elif key == simplegui.KEY_MAP["right"]:
+        my_ship.toggle_rotate("stop")       
+
+        
 def draw(canvas):
     global time
     
