@@ -191,9 +191,9 @@ class Sprite:
     def collide(self, other_object):
         distance = get_distance_between(self.pos, other_object.get_position())
         if (distance < self.radius + other_object.get_radius()):
-        	return True
-      	else:
-    		return False
+            return True
+        else:
+            return False
         
     def get_position(self):
         return self.pos
@@ -232,7 +232,7 @@ def click(pos):
         started = True
 
 def draw(canvas):
-    global time, started
+    global time, started, lives, score
     
     # animiate background
     time += 1
@@ -259,20 +259,33 @@ def draw(canvas):
     update_sprite_group(rock_group)
     update_sprite_group(missile_group)
 
+    # check for collisions
+    score += group_group_collide(rock_group, missile_group)
+    if group_collide(rock_group, my_ship):
+        lives -= 1
+        if lives == 0:
+            reset_game()
+    
     # draw splash screen if not started
     if not started:
         canvas.draw_image(splash_image, splash_info.get_center(), 
                           splash_info.get_size(), [WIDTH / 2, HEIGHT / 2], 
                           splash_info.get_size())
 
+def reset_game():
+    global started, rock_group
+    started = False
+    rock_group = set()
+        
 # timer handler that spawns a rock    
 def rock_spawner():
     global rock_group
-    if len(rock_group) < 12:
+    if len(rock_group) < 12 and started:
         rock_pos = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
-        rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
-        rock_avel = random.random() * .2 - .1
-        rock_group.add(Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info))
+        if get_distance_between(rock_pos, my_ship.get_position()) > 200: 
+            rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
+            rock_avel = random.random() * .2 - .1
+            rock_group.add(Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info))
 
 def get_distance_between(point1, point2):
     return math.sqrt( (point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2 )
@@ -291,8 +304,21 @@ def update_sprite_group(my_set):
 # other_object: Sprite
 # Return: True if collision, False if not 
 def group_collide(group, other_object):
-	
-        
+    retval = False
+    for item in list(group):
+        if item.collide(other_object):
+            group.remove(item)
+            retval = True
+    return retval
+
+def group_group_collide(group1, group2):
+    counter = 0
+    for item in list(group1):
+        if group_collide(group2, item):
+            counter += 1
+            group1.remove(item)
+    return counter
+
 # initialize stuff
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
