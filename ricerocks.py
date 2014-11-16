@@ -273,9 +273,14 @@ def draw(canvas):
                           splash_info.get_size())
 
 def reset_game():
-    global started, rock_group
+    global started, rock_group, missile_group, score, lives
     started = False
     rock_group = set()
+    missile_group = set()
+    score = 0
+    lives = 3
+    soundtrack.rewind()
+    soundtrack.play()
         
 # timer handler that spawns a rock    
 def rock_spawner():
@@ -324,8 +329,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-rock_group = set()
-missile_group = set()
+reset_game()
 
 # register handlers
 frame.set_keyup_handler(keyup)
