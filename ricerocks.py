@@ -87,7 +87,6 @@ def dist(p, q):
 
 # Ship class
 class Ship:
-
     def __init__(self, pos, vel, angle, image, info):
         self.pos = [pos[0], pos[1]]
         self.vel = [vel[0], vel[1]]
@@ -106,7 +105,6 @@ class Ship:
         else:
             canvas.draw_image(self.image, self.image_center, self.image_size,
                               self.pos, self.image_size, self.angle)
-        # canvas.draw_circle(self.pos, self.radius, 1, "White", "White")
 
     def update(self):
         # update angle
@@ -140,13 +138,17 @@ class Ship:
         self.angle_vel -= .05
         
     def shoot(self):
-        global a_missile
+        global missile_group
         forward = angle_to_vector(self.angle)
         missile_pos = [self.pos[0] + self.radius * forward[0], self.pos[1] + self.radius * forward[1]]
         missile_vel = [self.vel[0] + 6 * forward[0], self.vel[1] + 6 * forward[1]]
-        a_missile = Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound)
+        missile_group.add(Sprite(missile_pos, missile_vel, self.angle, 0, missile_image, missile_info, missile_sound))
     
+    def get_position(self):
+        return self.pos
     
+    def get_radius(self):
+        return self.radius
     
 # Sprite class
 class Sprite:
@@ -177,6 +179,27 @@ class Sprite:
         # update position
         self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
         self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
+        
+        # increment the age
+        self.age += 1
+        if self.age > self.lifespan:
+            return True
+        else:
+            return False
+        
+    # return: True if collision, false if not
+    def collide(self, other_object):
+        distance = get_distance_between(self.pos, other_object.get_position())
+        if (distance < self.radius + other_object.get_radius()):
+        	return True
+      	else:
+    		return False
+        
+    def get_position(self):
+        return self.pos
+    
+    def get_radius(self):
+        return self.radius
   
         
 # key handlers to control ship   
@@ -228,13 +251,13 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-    a_rock.draw(canvas)
-    a_missile.draw(canvas)
+    process_sprite_group(rock_group, canvas)
+    process_sprite_group(missile_group, canvas)
     
     # update ship and sprites
     my_ship.update()
-    a_rock.update()
-    a_missile.update()
+    update_sprite_group(rock_group)
+    update_sprite_group(missile_group)
 
     # draw splash screen if not started
     if not started:
@@ -244,20 +267,39 @@ def draw(canvas):
 
 # timer handler that spawns a rock    
 def rock_spawner():
-    global a_rock
-    rock_pos = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
-    rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
-    rock_avel = random.random() * .2 - .1
-    a_rock = Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info)
+    global rock_group
+    if len(rock_group) < 12:
+        rock_pos = [random.randrange(0, WIDTH), random.randrange(0, HEIGHT)]
+        rock_vel = [random.random() * .6 - .3, random.random() * .6 - .3]
+        rock_avel = random.random() * .2 - .1
+        rock_group.add(Sprite(rock_pos, rock_vel, 0, rock_avel, asteroid_image, asteroid_info))
+
+def get_distance_between(point1, point2):
+    return math.sqrt( (point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2 )
+        
+def process_sprite_group(my_set, canvas):
+    for item in list(my_set):
+        item.draw(canvas)
+        
+def update_sprite_group(my_set):
+    for item in list(my_set):
+        if item.update():
+            my_set.remove(item)
             
+# Look for collisions between the set and the other object
+# group: set
+# other_object: Sprite
+# Return: True if collision, False if not 
+def group_collide(group, other_object):
+	
+        
 # initialize stuff
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, .1, asteroid_image, asteroid_info)
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
-
+rock_group = set()
+missile_group = set()
 
 # register handlers
 frame.set_keyup_handler(keyup)
